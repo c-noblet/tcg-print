@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let currentSlot = null;
+// Number of slots to add when running low
+const PAGE_SIZE = 9;
+// Threshold of empty slots before we auto-add more
+const EMPTY_THRESHOLD = 3;
 
 // Initialize grid
 function initGrid() {
@@ -103,6 +107,8 @@ function addImageToSlot(slot, file) {
     
     slot.insertBefore(img, slot.firstChild);
     slot.classList.add('has-image');
+    // After adding an image, ensure there are enough empty slots
+    ensureSlotsAvailable();
   };
   reader.readAsDataURL(file);
 }
@@ -117,6 +123,8 @@ function removeImage(slot) {
   slot.insertBefore(placeholder, slot.firstChild);
   
   slot.classList.remove('has-image');
+  // After removing an image, ensure there are enough empty slots
+  ensureSlotsAvailable();
 }
 
 function clearAll() {
@@ -133,14 +141,31 @@ function printCards() {
 document.getElementById('fileInput').addEventListener('change', (e) => {
   const files = Array.from(e.target.files);
   
-  if (currentSlot && files.length === 1) {
-    // Single file to specific slot
-    addImageToSlot(currentSlot, files[0]);
+  let remainingFiles = files.slice();
+
+  if (currentSlot && remainingFiles.length > 0) {
+    // Place first file into the targeted slot
+    const first = remainingFiles.shift();
+    if (first && first.type.startsWith('image/')) {
+      addImageToSlot(currentSlot, first);
+    }
     currentSlot = null;
-  } else if (files.length > 0) {
-    // Multiple files - fill empty slots
-    const emptySlots = Array.from(document.querySelectorAll('.card-slot:not(.has-image)'));
-    files.forEach((file, index) => {
+  }
+
+  if (remainingFiles.length > 0) {
+    // Ensure there are enough empty slots for all remaining files
+    const grid = document.getElementById('cardGrid');
+    let emptySlots = Array.from(grid.querySelectorAll('.card-slot:not(.has-image)'));
+    if (remainingFiles.length > emptySlots.length) {
+      const needed = remainingFiles.length - emptySlots.length;
+      // Add exactly the number of slots needed to fit all files
+      addSlots(needed);
+      // Recompute empty slots after adding
+      emptySlots = Array.from(grid.querySelectorAll('.card-slot:not(.has-image)'));
+    }
+
+    // Fill empty slots with the remaining files in order
+    remainingFiles.forEach((file, index) => {
       if (index < emptySlots.length && file.type.startsWith('image/')) {
         addImageToSlot(emptySlots[index], file);
       }
@@ -149,3 +174,24 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
   
   e.target.value = ''; // Reset file input
 });
+
+// Ensure there are enough empty slots; if empty slots <= threshold, add PAGE_SIZE more
+function ensureSlotsAvailable() {
+  const grid = document.getElementById('cardGrid');
+  const emptySlots = grid.querySelectorAll('.card-slot:not(.has-image)');
+  if (emptySlots.length <= EMPTY_THRESHOLD) {
+    addSlots(PAGE_SIZE);
+  }
+}
+
+// Add `count` new slots to the grid, keeping dataset.index sequential
+function addSlots(count) {
+  const grid = document.getElementById('cardGrid');
+  // Determine next index based on existing slots
+  const existing = grid.querySelectorAll('.card-slot');
+  let nextIndex = existing.length;
+  for (let i = 0; i < count; i++) {
+    const slot = createCardSlot(nextIndex + i);
+    grid.appendChild(slot);
+  }
+}
