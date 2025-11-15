@@ -90,7 +90,6 @@ button.danger:hover {
 }
 
 .card-slot {
-  border: 2px dashed #ccc;
   border-radius: 4px;
   background: #fafafa;
   display: flex;
@@ -109,7 +108,7 @@ button.danger:hover {
 
 .card-slot.has-image {
   border-style: solid;
-  border-color: #28a745;
+  border-color: transparent
 }
 
 .card-slot img {
