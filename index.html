@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TCG Print</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="controls">
+    <h1>🃏 TCG Card Printer</h1>
+    
+    <div class="control-group">
+      <label for="cardType">Card Type:</label>
+      <select id="cardType">
+        <option value="yugioh">Yu-Gi-Oh! (59x86mm)</option>
+        <option value="mtg">Magic: The Gathering (63x88mm)</option>
+        <option value="pokemon">Pokémon (63x88mm)</option>
+        <option value="standard">Standard Playing Card (63x88mm)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <button onclick="printCards()">🖨️ Print Cards</button>
+      <button onclick="clearAll()" class="danger">🗑️ Clear All</button>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+      <button onclick="document.getElementById('fileInput').click()">📁 Upload Images</button>
+    </div>
+
+    <div class="info">
+      💡 <strong>How to use:</strong> Click on a slot or drag & drop images onto the grid. Press Ctrl+P to print at exact size (100% scale), then cut and sleeve!
+      <div class="grid-info">📐 Fixed 3×3 grid (9 cards per A4 page) optimized for cutting and sleeving</div>
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <div id="cardGrid" class="card-grid size-yugioh"></div>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
